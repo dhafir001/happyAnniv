@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>snake nokia · start dulu</title>
+  <style>
+    /* ========== RESET & FIT HP ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1b3420;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* kotak utama full tanpa scroll */
+    .hp-full {
+      width: 100%;
+      height: 100%;
+      max-width: 380px;
+      background: #7fa07f;
+      border-radius: 30px 30px 35px 35px;
+      box-shadow: inset 0 -6px 0 #4a6b4f, inset 0 6px 0 #c2e6c2, 0 15px 20px #1d2f20;
+      border: 4px solid #32633a;
+      padding: 12px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .lcd-panel {
+      background: #1e4a26;
+      border: 5px solid #2b7336;
+      border-radius: 18px 18px 22px 22px;
+      padding: 8px 8px 6px;
+      box-shadow: inset 0 0 0 3px #0c3816;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .game-area {
+      background: #17421f;
+      border-radius: 12px;
+      padding: 8px 6px;
+      border: 3px solid #379444;
+      box-shadow: inset 0 0 0 3px #0f3a19;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* header super irit */
+    .header-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ceffc4;
+      font-size: 14px;
+      font-weight: bold;
+      border-bottom: 2px dashed #3b9343;
+      padding-bottom: 5px;
+      margin-bottom: 6px;
+    }
+
+    .batt {
+      display: flex;
+      gap: 3px;
+    }
+    .batt span {
+      background: #93da93;
+      width: 6px;
+      height: 12px;
+      border: 1px solid #267326;
+    }
+
+    /* SELECTOR KARAKTER */
+    .karakter-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 6px 0 8px;
+    }
+
+    .karakter-btn {
+      background: #598865;
+      border: 4px solid #2b6137;
+      color: #ebffeb;
+      font-family: 'Courier New', monospace;
+      font-weight: 900;
+      font-size: 16px;
+      padding: 8px 0;
+      text-align: center;
+      flex: 1;
+      cursor: pointer;
+      box-shadow: inset -2px -2px 0 #2b5431, inset 2px 2px 0 #a3d8a3;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .karakter-btn.selected {
+      background: #307a42;
+      border-color: #b1f5b1;
+      color: white;
+      box-shadow: inset 3px 3px 0 #1d4f1d, inset -3px -3px 0 #70ba70;
+    }
+
+    /* score panel */
+    .skor-box {
+      background: #174f23;
+      border: 3px solid #389e45;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: bolder;
+      color: #c5ffc2;
+      margin: 5px 0 6px;
+      box-shadow: inset 2px 2px 0 #0a3a15;
+    }
+
+    /* canvas ukuran kompak */
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2px 0;
+    }
+
+    canvas {
+      display: block;
+      width: 210px;
+      height: 210px;
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
+      background: #1f562a;
+      border: 6px solid #2f883d;
+      box-shadow: inset 0 0 0 4px #154d20;
+    }
+
+    /* KEYPAD NOKIA RAPI */
+    .keypad-kompak {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 4px;
+      gap: 4px;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .nok-key {
+      background: #5f8a69;
+      border: 4px solid #31663f;
+      color: #f0fff0;
+      font-size: 28px;
+      font-weight: 900;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset -3px -3px 0 #2a5833, inset 3px 3px 0 #abd8ab;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .nok-key:active {
+      background: #3c784b;
+      box-shadow: inset 4px 4px 0 #1f5429, inset -4px -4px 0 #79b37c;
+    }
+
+    /* TOMBOL START BESAR (pusat perhatian) */
+    .start-besar {
+      background: #4f7b5a;
+      border: 6px solid #215f2f;
+      color: #eeffee;
+      font-size: 32px;
+      font-weight: 900;
+      padding: 12px 0;
+      text-align: center;
+      letter-spacing: 4px;
+      box-shadow: inset -4px -4px 0 #1b5027, inset 4px 4px 0 #9ed89e;
+      cursor: pointer;
+      margin: 6px 0 4px;
+      width: 100%;
+      font-family: 'Courier New', monospace;
+    }
+
+    .start-besar:active {
+      background: #2d7040;
+      box-shadow: inset 5px 5px 0 #12421d, inset -5px -5px 0 #66a86a;
+    }
+
+    .restart-key {
+      background: #7a6073;
+      border-color: #583d50;
+      color: #ffddf5;
+      width: auto;
+      padding: 10px 28px;
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+
+    .footer-tip {
+      text-align: center;
+      color: #bbf0bb;
+      font-size: 10px;
+      border-top: 2px dashed #3d9e45;
+      margin-top: 4px;
+      padding-top: 4px;
+    }
+
+    .hidden-img {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="hp-full">
+  <div class="lcd-panel">
+    <div class="game-area">
+      <!-- header -->
+      <div class="header-status">
+        <span>🐍 NOKIA</span>
+        <div class="batt"><span></span><span></span><span></span></div>
+      </div>
+
+      <!-- pilih karakter -->
+      <div class="karakter-row">
+        <div class="karakter-btn" id="pilihDhafir">DHAFIR</div>
+        <div class="karakter-btn" id="pilihIntan">INTAN</div>
+      </div>
+
+      <!-- skor -->
+      <div class="skor-box">
+        <span>🍎 SKOR</span>
+        <span id="skorAngka">0</span>
+      </div>
+
+      <!-- canvas -->
+      <div class="canvas-container">
+        <canvas id="gameCanvas" width="210" height="210"></canvas>
+      </div>
+
+      <!-- TOMBOL START BESAR (game mulai setelah ini) -->
+      <div class="start-besar" id="startGameBtn">▶ START</div>
+
+      <!-- keypad (arah & restart) -->
+      <div class="keypad-kompak">
+        <div class="key-row">
+          <div class="nok-key" id="keyUp">▲</div>
+        </div>
+        <div class="key-row">
+          <div class="nok-key" id="keyLeft">◀</div>
+          <div class="nok-key" id="keyDown">▼</div>
+          <div class="nok-key" id="keyRight">▶</div>
+        </div>
+        <div class="key-row">
+          <div class="nok-key restart-key" id="restartBtn">↺</div>
+        </div>
+      </div>
+
+      <div class="footer-tip">
+        ✈️ planes1 (dhafir) / planes2 (intan)
+      </div>
+    </div>
+  </div>
+
+  <!-- gambar planes -->
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%23336699' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ctext x='10' y='17' font-size='14' text-anchor='middle' fill='%23ffffff' font-family='monospace' font-weight='bold'%3E✈1%3C/text%3E%3C/svg%3E" alt="planes1" id="imgPlanes1" class="hidden-img">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%23b33b77' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ctext x='10' y='17' font-size='14' text-anchor='middle' fill='%23ffffff' font-family='monospace' font-weight='bold'%3E✈2%3C/text%3E%3C/svg%3E" alt="planes2" id="imgPlanes2" class="hidden-img">
+</div>
+
+<script>
+  (function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const skorSpan = document.getElementById('skorAngka');
+
+    // elemen
+    const btnDhafir = document.getElementById('pilihDhafir');
+    const btnIntan = document.getElementById('pilihIntan');
+    const startBtn = document.getElementById('startGameBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // gambar
+    const imgPlanes1 = document.getElementById('imgPlanes1');
+    const imgPlanes2 = document.getElementById('imgPlanes2');
+
+    // state
+    let karakter = 'dhafir';  // default
+    btnDhafir.classList.add('selected');
+
+    let snake = [
+      {x: 7, y: 7},
+      {x: 6, y: 7},
+      {x: 5, y: 7},
+      {x: 4, y: 7}
+    ];
+    let food = {x: 10, y: 7};
+    let direction = 'right';
+    let nextDir = 'right';
+    let skor = 0;
+
+    // gameRunning diatur oleh START
+    let gameRunning = false;
+    let loopInterval = null;
+
+    const gridSize = 14;
+    const cellSize = 15; // 210/14
+
+    // ----- gambar awal (diam) -----
+    function drawStaticBoard() {
+      ctx.clearRect(0, 0, 210, 210);
+      ctx.fillStyle = '#1f562a';
+      ctx.fillRect(0, 0, 210, 210);
+      // grid
+      ctx.strokeStyle = '#35883d';
+      ctx.lineWidth = 0.6;
+      for (let i=0; i<=gridSize; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i*cellSize, 0); ctx.lineTo(i*cellSize, 210);
+        ctx.strokeStyle = '#36853d'; ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i*cellSize); ctx.lineTo(210, i*cellSize);
+        ctx.stroke();
+      }
+      // gambar statis: ular dan makanan (tanpa gerak)
+      snake.forEach((seg, idx) => {
+        if (idx === 0) return;
+        const x = seg.x * cellSize;
+        const y = seg.y * cellSize;
+        ctx.fillStyle = '#1b471b';
+        ctx.fillRect(x+1, y+1, cellSize-2, cellSize-2);
+        ctx.fillStyle = '#2fad2f';
+        ctx.fillRect(x+3, y+3, cellSize-6, cellSize-6);
+      });
+      // makanan
+      ctx.fillStyle = '#d95b3a';
+      ctx.beginPath();
+      ctx.arc(food.x * cellSize + cellSize/2, food.y * cellSize + cellSize/2, 6, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#b0d93a';
+      ctx.beginPath();
+      ctx.arc(food.x * cellSize + cellSize/2 - 2, food.y * cellSize + cellSize/2 - 3, 2, 0, 2*Math.PI);
+      ctx.fill();
+
+      // gambar kepala sesuai karakter
+      const head = snake[0];
+      const hx = head.x * cellSize;
+      const hy = head.y * cellSize;
+      const img = (karakter === 'dhafir') ? imgPlanes1 : imgPlanes2;
+      if (img) {
+        try { ctx.drawImage(img, hx+1, hy+1, cellSize-2, cellSize-2); } catch (e) {
+          ctx.fillStyle = (karakter==='dhafir')? '#3469b0' : '#c24387';
+          ctx.fillRect(hx+1, hy+1, cellSize-2, cellSize-2);
+        }
+      } else {
+        ctx.fillStyle = (karakter==='dhafir')? '#3469b0' : '#c24387';
+        ctx.fillRect(hx+1, hy+1, cellSize-2, cellSize-2);
+      }
+      ctx.strokeStyle = '#1f631f';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(hx, hy, cellSize, cellSize);
+    }
+
+    // gambar pertama
+    drawStaticBoard();
+
+    // ----- pilih karakter (ubah langsung gambar diam) -----
+    btnDhafir.addEventListener('click', ()=>{
+      karakter = 'dhafir';
+      btnDhafir.classList.add('selected');
+      btnIntan.classList.remove('selected');
+      drawStaticBoard(); // refresh kepala
+    });
+
+    btnIntan.addEventListener('click', ()=>{
+      karakter = 'intan';
+      btnIntan.classList.add('selected');
+      btnDhafir.classList.remove('selected');
+      drawStaticBoard();
+    });
+
+    // ----- START GAME (memulai loop) -----
+    startBtn.addEventListener('click', ()=>{
+      if (gameRunning) return; // sudah jalan
+      // reset posisi dan skor
+      snake = [
+        {x: 7, y: 7},
+        {x: 6, y: 7},
+        {x: 5, y: 7},
+        {x: 4, y: 7}
+      ];
+      direction = 'right';
+      nextDir = 'right';
+      skor = 0;
+      skorSpan.innerText = '0';
+      generateFood();
+      gameRunning = true;
+      if (loopInterval) clearInterval(loopInterval);
+      loopInterval = setInterval(update, 200);
+      drawCanvas(); // gambar aktif
+    });
+
+    // restart (sama seperti start, tapi tetap running)
+    restartBtn.addEventListener('click', ()=>{
+      // reset paksa, lalu jalan
+      snake = [
+        {x: 7, y: 7},
+        {x: 6, y: 7},
+        {x: 5, y: 7},
+        {x: 4, y: 7}
+      ];
+      direction = 'right';
+      nextDir = 'right';
+      skor = 0;
+      skorSpan.innerText = '0';
+      generateFood();
+      if (!gameRunning) {
+        gameRunning = true;
+        if (loopInterval) clearInterval(loopInterval);
+        loopInterval = setInterval(update, 200);
+      }
+      drawCanvas();
+    });
+
+    // keypad arah
+    document.getElementById('keyUp').addEventListener('click', ()=>{
+      if (!gameRunning) return;
+      if (direction !== 'down') nextDir = 'up';
+    });
+    document.getElementById('keyDown').addEventListener('click', ()=>{
+      if (!gameRunning) return;
+      if (direction !== 'up') nextDir = 'down';
+    });
+    document.getElementById('keyLeft').addEventListener('click', ()=>{
+      if (!gameRunning) return;
+      if (direction !== 'right') nextDir = 'left';
+    });
+    document.getElementById('keyRight').addEventListener('click', ()=>{
+      if (!gameRunning) return;
+      if (direction !== 'left') nextDir = 'right';
+    });
+
+    // keyboard
+    window.addEventListener('keydown', (e)=>{
+      if (!gameRunning) return;
+      const key = e.key;
+      if (key === 'ArrowUp' || key === 'w') { e.preventDefault(); if(direction !== 'down') nextDir = 'up'; }
+      else if (key === 'ArrowDown' || key === 's') { e.preventDefault(); if(direction !== 'up') nextDir = 'down'; }
+      else if (key === 'ArrowLeft' || key === 'a') { e.preventDefault(); if(direction !== 'right') nextDir = 'left'; }
+      else if (key === 'ArrowRight' || key === 'd') { e.preventDefault(); if(direction !== 'left') nextDir = 'right'; }
+    });
+
+    // fungsi game
+    function generateFood() {
+      for (let i=0; i<1000; i++) {
+        const fx = Math.floor(Math.random() * gridSize);
+        const fy = Math.floor(Math.random() * gridSize);
+        if (!snake.some(s => s.x === fx && s.y === fy)) {
+          food = {x: fx, y: fy};
+          return;
+        }
+      }
+      for (let y=0; y<gridSize; y++) {
+        for (let x=0; x<gridSize; x++) {
+          if (!snake.some(s => s.x === x && s.y === y)) {
+            food = {x, y};
+            return;
+          }
+        }
+      }
+      gameOver();
+    }
+
+    function update() {
+      if (!gameRunning) return;
+
+      direction = nextDir;
+      const head = snake[0];
+      let newHead = {...head};
+      if (direction === 'right') newHead.x++;
+      else if (direction === 'left') newHead.x--;
+      else if (direction === 'up') newHead.y--;
+      else if (direction === 'down') newHead.y++;
+
+      if (newHead.x < 0 || newHead.x >= gridSize || newHead.y < 0 || newHead.y >= gridSize) {
+        gameOver();
+        return;
+      }
+
+      const makan = (newHead.x === food.x && newHead.y === food.y);
+      let bodyHit;
+      if (makan) {
+        bodyHit = snake.some(seg => seg.x === newHead.x && seg.y === newHead.y);
+      } else {
+        const tanpaEkor = snake.slice(0, -1);
+        bodyHit = tanpaEkor.some(seg => seg.x === newHead.x && seg.y === newHead.y);
+      }
+
+      if (bodyHit) {
+        gameOver();
+        return;
+      }
+
+      snake.unshift(newHead);
+      if (makan) {
+        skor++;
+        skorSpan.innerText = skor;
+        generateFood();
+      } else {
+        snake.pop();
+      }
+
+      drawCanvas();
+    }
+
+    function drawCanvas() {
+      ctx.clearRect(0, 0, 210, 210);
+      ctx.fillStyle = '#1f562a';
+      ctx.fillRect(0, 0, 210, 210);
+
+      ctx.strokeStyle = '#35883d';
+      ctx.lineWidth = 0.6;
+      for (let i=0; i<=gridSize; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i*cellSize, 0); ctx.lineTo(i*cellSize, 210);
+        ctx.strokeStyle = '#36853d'; ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i*cellSize); ctx.lineTo(210, i*cellSize);
+        ctx.stroke();
+      }
+
+      snake.forEach((seg, idx) => {
+        if (idx === 0) return;
+        const x = seg.x * cellSize;
+        const y = seg.y * cellSize;
+        ctx.fillStyle = '#1b471b';
+        ctx.fillRect(x+1, y+1, cellSize-2, cellSize-2);
+        ctx.fillStyle = '#2fad2f';
+        ctx.fillRect(x+3, y+3, cellSize-6, cellSize-6);
+      });
+
+      ctx.fillStyle = '#d95b3a';
+      ctx.beginPath();
+      ctx.arc(food.x * cellSize + cellSize/2, food.y * cellSize + cellSize/2, 6, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#b0d93a';
+      ctx.beginPath();
+      ctx.arc(food.x * cellSize + cellSize/2 - 2, food.y * cellSize + cellSize/2 - 3, 2, 0, 2*Math.PI);
+      ctx.fill();
+
+      const head = snake[0];
+      const hx = head.x * cellSize;
+      const hy = head.y * cellSize;
+      const img = (karakter === 'dhafir') ? imgPlanes1 : imgPlanes2;
+      if (img) {
+        try { ctx.drawImage(img, hx+1, hy+1, cellSize-2, cellSize-2); } catch (e) {
+          ctx.fillStyle = (karakter==='dhafir')? '#3469b0' : '#c24387';
+          ctx.fillRect(hx+1, hy+1, cellSize-2, cellSize-2);
+        }
+      } else {
+        ctx.fillStyle = (karakter==='dhafir')? '#3469b0' : '#c24387';
+        ctx.fillRect(hx+1, hy+1, cellSize-2, cellSize-2);
+      }
+      ctx.strokeStyle = '#1f631f';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(hx, hy, cellSize, cellSize);
+    }
+
+    function gameOver() {
+      if (!gameRunning) return;
+      gameRunning = false;
+      if (loopInterval) clearInterval(loopInterval);
+      ctx.fillStyle = '#174217';
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(30, 85, 150, 30);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#b0f0b0';
+      ctx.font = 'bold 14px monospace';
+      ctx.fillText('GAME OVER', 45, 108);
+    }
+  })();
+</script>
+</body>
+</html>

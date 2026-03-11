@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>3y 5m · kita</title>
+  
+  <!-- Cuma 1 font biar ringan -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* RESET SUPER RINGAN */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0c0f15;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      line-height: 1.4;
+    }
+
+    /* BACKGROUND SEDERHANA TAPI ELEGAN - PALING RINGAN */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(circle at 30% 40%, #1a2538, #0a0d12 80%);
+    }
+    
+    /* HANYA 8 BINTANG, CUKUP, TIDAK BERAT */
+    .star {
+      position: fixed;
+      width: 2px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      z-index: 1;
+    }
+    
+    .star:nth-child(1) { top: 15%; left: 10%; animation: twinkle 4s infinite; }
+    .star:nth-child(2) { top: 25%; left: 85%; width: 3px; height: 3px; animation: twinkle 5s infinite 1s; }
+    .star:nth-child(3) { top: 60%; left: 20%; animation: twinkle 4.5s infinite 0.5s; }
+    .star:nth-child(4) { top: 75%; left: 70%; width: 1.5px; height: 1.5px; animation: twinkle 3.5s infinite 1.5s; }
+    .star:nth-child(5) { top: 40%; left: 45%; animation: twinkle 5.5s infinite; }
+    .star:nth-child(6) { top: 85%; left: 30%; animation: twinkle 4s infinite 2s; }
+    .star:nth-child(7) { top: 10%; left: 60%; animation: twinkle 6s infinite 0.8s; }
+    .star:nth-child(8) { top: 50%; left: 80%; animation: twinkle 3.8s infinite 1.2s; }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* CONTAINER */
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* CARD - SEMITRANSPARAN TAPI RINGAN (BACKDROP-FILTER TETAP DIPAKAI TAPI HATI-HATI) */
+    .card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(20, 25, 35, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 36px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      animation: naik 0.8s ease-out;
+    }
+
+    @keyframes naik {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HEADER */
+    .label {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 500;
+      line-height: 1.1;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+      color: white;
+    }
+
+    .sub {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    /* TIMELINE SIMPEL */
+    .date-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 12px 18px;
+      border-radius: 60px;
+      width: fit-content;
+      margin: 0 auto 24px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      font-size: 0.95rem;
+    }
+
+    .date-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .date-day {
+      font-weight: 500;
+      color: white;
+    }
+    
+    .date-year {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .date-divider {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.2rem;
+    }
+
+    /* DESCRIPTION */
+    .pesan {
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.75);
+      margin: 28px 0 32px;
+      padding: 0 8px;
+      max-width: 280px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* BUTTON - RINGAN DAN RESPONSIF */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: white;
+      border: none;
+      border-radius: 40px;
+      padding: 4px 4px 4px 28px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #0c0f15;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .btn-icon {
+      background: #0c0f15;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* FOOTER RINGAN */
+    .footer {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* FADE OUT */
+    .fade-out {
+      animation: fadeOut 0.5s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; transform: scale(0.95); }
+    }
+
+    /* HAPUS EFEK BERAT */
+    .btn, .card, .date-row {
+      -webkit-touch-callout: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- BACKGROUND SUPER RINGAN -->
+  <div class="bg"></div>
+  
+  <!-- BINTANG CUMA 8 BUAH -->
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+
+  <!-- MAIN CARD -->
+  <div class="container">
+    <div class="card" id="mainCard">
+      <div class="label">tiga tahun · lima bulan</div>
+      
+      <h1>3y 5m</h1>
+      <div class="sub">sejak 12 Oktober 2022</div>
+      
+      <!-- DATE ROW SIMPEL -->
+      <div class="date-row">
+        <div class="date-item">
+          <span class="date-day">12 Okt</span>
+          <span class="date-year">2022</span>
+        </div>
+        <span class="date-divider">—</span>
+        <div class="date-item">
+          <span class="date-day">12 Mar</span>
+          <span class="date-year">2026</span>
+        </div>
+      </div>
+      
+      <!-- PESAN SINGKAT -->
+      <div class="pesan">
+        Dari awal yang sederhana, tumbuh jadi ribuan cerita. Dan ini masih awal.
+      </div>
+      
+      <!-- BUTTON -->
+      <button class="btn" id="startBtn">
+        <span>Lanjutkan</span>
+        <div class="btn-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </button>
+      
+      <!-- FOOTER -->
+      <div class="footer">
+        <span>mobile only</span>
+        <span>•</span>
+        <span>dengan tenang</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const startBtn = document.getElementById('startBtn');
+      const mainCard = document.getElementById('mainCard');
+      
+      // fungsi sederhana tanpa embel-embel
+      startBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // animasi fade out
+        mainCard.classList.add('fade-out');
+        
+        // disable biar ga dobel klik
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.7';
+        
+        // redirect setelah animasi
+        setTimeout(() => {
+          window.location.href = 'journey.html';
+        }, 450);
+      });
+    })();
+  </script>
+</body>
+</html>

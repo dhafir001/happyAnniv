@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <!-- VIEWPORT DIPERBAIKI: initial-scale=1, maximum-scale=1, user-scalable=no sudah cukup -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>choose your pilot + bigger planes · mobile fix</title>
+  <style>
+    /* RESET & DASAR */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow: hidden;  /* mencegah scroll global, tapi layer-journey bisa di-scroll jika perlu */
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 30% 10%, #0a1422, #02040a 95%);
+      color: #edeff2;
+      position: relative;
+    }
+
+    /* background cosmic */
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(1px 1px at 10px 20px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 90px 180px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 250px 70px, #b0d0ff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 320px 420px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 150px 550px, #aac9ff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 40px 300px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 380px 200px, #c0d8ff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 120px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 280px 490px, #d0e4ff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 200px 380px, #fff, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 400px 600px;
+      opacity: 0.5;
+      animation: twinkle 8s infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.4; }
+      100% { opacity: 0.8; }
+    }
+
+    .nebula {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      mix-blend-mode: soft-light;
+      opacity: 0.25;
+      animation: slowDrift 24s infinite alternate;
+    }
+
+    .nebula.one {
+      width: 70vmax;
+      height: 70vmax;
+      background: #1e3a5f;
+      top: -20vh;
+      right: -20vw;
+    }
+
+    .nebula.two {
+      width: 60vmax;
+      height: 60vmax;
+      background: #2d4b6e;
+      bottom: -25vh;
+      left: -15vw;
+      animation: slowDrift 30s infinite alternate-reverse;
+    }
+
+    @keyframes slowDrift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(4%, 6%) scale(1.1); }
+    }
+
+    .floating-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(180, 210, 255, 0.4);
+      border-radius: 50%;
+      filter: blur(2px);
+      animation: floatParticle 15s infinite linear;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
+    }
+
+    /* ===== LAYER SELECTOR ===== */
+    .layer-selector {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: radial-gradient(circle at 30% 10%, #0a1422, #02040a 95%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 16px 30px;  /* padding bawah ditambah agar tombol tidak mentok */
+      transition: opacity 1s cubic-bezier(0.55, 0.085, 0.68, 0.53), visibility 1s;
+      overflow-y: auto;  /* mengantisipasi layar sangat kecil */
+    }
+
+    .layer-selector.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .selector-title {
+      font-size: 38px;        /* sedikit dikurangi agar pas di hp */
+      font-weight: 300;
+      letter-spacing: 6px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff, #b5cef0, #d9e8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      text-align: center;
+      text-shadow: 0 0 30px rgba(180, 210, 255, 0.3);
+      animation: titleGlow 3s infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      0% { text-shadow: 0 0 20px rgba(180, 210, 255, 0.2); }
+      100% { text-shadow: 0 0 40px rgba(220, 240, 255, 0.5); }
+    }
+
+    .selector-sub {
+      font-size: 14px;
+      opacity: 0.6;
+      margin-bottom: 30px;    /* dikurangi */
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .pilot-container {
+      display: flex;
+      gap: 20px;             /* diperkecil untuk hp */
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;    /* konsisten */
+      perspective: 1000px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .pilot-card {
+      background: rgba(8, 18, 30, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 40px;    /* sedikit lebih kecil */
+      padding: 25px 20px;     /* padding disesuaikan */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      backdrop-filter: blur(20px);
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 220px;           /* lebar pas di hp */
+      box-shadow: 0 30px 50px -25px #000000;
+      transform-style: preserve-3d;
+    }
+
+    /* di layar sangat kecil (misal 360px) jadi lebih ramping */
+    @media (max-width: 420px) {
+      .pilot-card {
+        width: 190px;
+        padding: 18px 12px;
+      }
+      .pilot-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 44px;
+      }
+    }
+
+    .pilot-card.selected {
+      border-color: #ffd966;
+      background: rgba(30, 50, 80, 0.9);
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 0 0 40px rgba(255, 220, 100, 0.4);
+    }
+
+    .pilot-avatar {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 300;
+      color: white;
+      text-shadow: 0 4px 15px black;
+      border: 3px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .pilot-name {
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 2px;
+    }
+
+    .pilot-desc {
+      font-size: 14px;
+      opacity: 0.7;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .pilot-style {
+      font-size: 13px;
+      padding: 6px 18px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.1);
+      margin-top: 5px;
+      letter-spacing: 1px;
+    }
+
+    /* TOMBOL MULAI PERJALANAN — DIPASTIKAN TERLIHAT */
+    .start-journey-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 215, 0, 0.4);
+      border-radius: 60px;
+      padding: 18px 50px;      /* padding horizontal dikurangi agar muat */
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      color: white;
+      backdrop-filter: blur(20px);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      margin-top: 15px;
+      margin-bottom: 10px;     /* kasih jarak bawah */
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;      /* teks jangan wrap */
+      max-width: 90vw;          /* agar tidak melar */
+    }
+
+    .start-journey-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .start-journey-btn:active::before {
+      left: 100%;               /* efek di touch */
+    }
+
+    .start-journey-btn:active {
+      transform: scale(0.98);
+      background: rgba(255, 215, 0, 0.2);
+    }
+
+    .start-journey-btn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    /* LAYER JOURNEY (perjalanan) */
+    .layer-journey {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 12px 18px;   /* padding lebih kecil */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.2), visibility 1.2s;
+      overflow-y: auto;           /* jika konten kelebihan bisa scroll */
+      background: radial-gradient(circle at 30% 10%, #0a1422, #02040a 95%);
+    }
+
+    .layer-journey.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .journey-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .journey-eyebrow {
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #9bb5da;
+      margin-bottom: 8px;
+    }
+
+    .journey-title {
+      font-size: 22px;           /* lebih kecil untuk hp */
+      font-weight: 300;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #ffffff, #b5cef0, #d9e8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .pilot-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8, 18, 30, 0.7);
+      padding: 6px 18px;
+      border-radius: 40px;
+      margin: 5px 0 4px;
+      border: 1px solid rgba(255,215,0,0.3);
+      backdrop-filter: blur(10px);
+      font-size: 14px;
+    }
+
+    .pilot-indicator-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,215,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffd966;
+    }
+
+    .time-pillar {
+      margin-top: 4px;
+      margin-bottom: 6px;
+      padding: 8px 20px;
+      background: rgba(8, 18, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 350;
+      backdrop-filter: blur(20px);
+      color: #e5f0ff;
+    }
+
+    .journey-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 0;
+      min-height: 280px;  /* supaya tetap proporsional */
+    }
+
+    .journey-card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;      /* disesuaikan */
+      height: 50vh;          /* relative to viewport */
+      min-height: 340px;
+      max-height: 520px;
+      border-radius: 40px;
+      background: rgba(2, 10, 22, 0.4);
+      border: 1px solid rgba(190, 215, 255, 0.12);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 45px 80px -25px #000000cc;
+      overflow: hidden;
+    }
+
+    .path-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    }
+
+    .route-base {
+      fill: none;
+      stroke: rgba(130, 170, 220, 0.2);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 8 12;
+    }
+
+    .route-progress {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 4.5;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    }
+
+    .milestone {
+      fill: #c4dcff;
+      filter: drop-shadow(0 2px 6px rgba(0,30,60,0.8));
+      opacity: 0.9;
+    }
+
+    /* PLANE BESAR (sesuai permintaan) + glow */
+    .plane {
+      position: absolute;
+      width: 75px;          /* sedikit lebih kecil dari 80 agar pas di card, tapi tetap besar */
+      height: 75px;
+      object-fit: contain;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, -50%) rotate(0deg);
+      filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.8)) brightness(1.3) contrast(1.2) drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+      z-index: 25;
+      pointer-events: none;
+      image-rendering: crisp-edges;
+      transition: transform 0.05s linear;
+    }
+
+    .trail-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+      overflow: visible;
+    }
+
+    .stardust {
+      position: absolute;
+      background: radial-gradient(circle, rgba(220, 240, 255, 0.7) 0%, rgba(160, 200, 255, 0.2) 60%, transparent 90%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      filter: blur(3px);
+      mix-blend-mode: screen;
+      animation: fadeDust 1.2s ease-out forwards;
+    }
+
+    @keyframes fadeDust {
+      0% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.5); }
+    }
+
+    .label {
+      position: absolute;
+      padding: 6px 12px;
+      border-radius: 30px;
+      background: rgba(5, 15, 28, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 10px;
+      font-weight: 300;
+      opacity: 0;
+      transform: scale(0.92) translateY(8px);
+      transition: opacity 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2), transform 0.9s ease;
+      backdrop-filter: blur(12px);
+      color: #eaf3ff;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .label.show {
+      opacity: 0.95;
+      transform: scale(1) translateY(0);
+    }
+
+    .label strong {
+      font-weight: 500;
+      color: white;
+      margin-right: 4px;
+      text-transform: uppercase;
+      font-size: 9px;
+    }
+
+    .bottom {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 300;
+      color: #cbd9f0;
+      padding: 0 4px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #b5d0ff, #ffffff);
+      border-radius: 10px;
+      transition: width 0.1s ease-out;
+    }
+
+    .footnote {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      opacity: 0.5;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .fade-out {
+      animation: fadeOut 1s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: scale(0.97); filter: blur(2px); visibility: hidden; }
+    }
+
+    /* penyesuaian untuk layar sangat sempit */
+    @media (max-width: 380px) {
+      .plane {
+        width: 65px;
+        height: 65px;
+      }
+      .journey-card {
+        height: 46vh;
+        min-height: 300px;
+      }
+      .start-journey-btn {
+        font-size: 18px;
+        padding: 14px 30px;
+        letter-spacing: 3px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="nebula one"></div>
+  <div class="nebula two"></div>
+  <div class="floating-particles" id="floatingParticles"></div>
+
+  <!-- LAYER 1: SELECTOR PILOT (SUDAH DIJAMIN TOMBOL TERLIHAT) -->
+  <div class="layer-selector" id="layerSelector">
+    <div class="selector-title">pilih pilot</div>
+    <div class="selector-sub">siapa yang akan memimpin perjalanan?</div>
+    
+    <div class="pilot-container">
+      <div class="pilot-card" id="selectorDhafir" data-pilot="dhafir">
+        <div class="pilot-avatar" style="background: linear-gradient(145deg, #1e3a5f, #0f263a);">D</div>
+        <div class="pilot-name">DHAFIR</div>
+        <div class="pilot-desc">penerbang disiplin<br/>mengikuti jalur dengan presisi</div>
+        <div class="pilot-style">stabil · terprediksi</div>
+      </div>
+      
+      <div class="pilot-card" id="selectorIntan" data-pilot="intan">
+        <div class="pilot-avatar" style="background: linear-gradient(145deg, #4a2b4a, #2e1b2e);">I</div>
+        <div class="pilot-name">INTAN</div>
+        <div class="pilot-desc">penerbang bebas<br/>jalur? bukan gaya saya</div>
+        <div class="pilot-style">liar · tak terduga</div>
+      </div>
+    </div>
+
+    <!-- TOMBOL MULAI PERJALANAN: SEKARANG PASTI TERLIHAT KARENA PADDING BAWAH TELAH DITAMBAH -->
+    <button class="start-journey-btn disabled" id="startJourneyBtn" disabled>mulai perjalanan</button>
+  </div>
+
+  <!-- LAYER 2: JOURNEY -->
+  <div class="layer-journey" id="layerJourney">
+    <div class="journey-header">
+      <div class="journey-eyebrow">cosmic passage</div>
+      <div class="journey-title">12.10.2022 — 12.03.2026</div>
+      <div class="pilot-indicator" id="pilotIndicator">
+        <div class="pilot-indicator-avatar" id="pilotIndicatorAvatar">D</div>
+        <span id="pilotIndicatorName">DHAFIR</span>
+        <span style="opacity:0.5; margin-left:3px;">· at the helm</span>
+      </div>
+      <div class="time-pillar" id="monthDisplay">oct 2022</div>
+    </div>
+
+    <div class="journey-area">
+      <div class="journey-card">
+        <svg class="path-svg" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid meet">
+          <path id="routeBase" class="route-base" d="M40 540 C95 500, 115 470, 92 420 C72 370, 112 330, 165 316 C220 302, 250 280, 238 228 C224 170, 268 145, 318 110" />
+          <path id="routeProgress" class="route-progress" d="M40 540 C95 500, 115 470, 92 420 C72 370, 112 330, 165 316 C220 302, 250 280, 238 228 C224 170, 268 145, 318 110" />
+          <circle class="milestone" cx="40" cy="540" r="5" />
+          <circle class="milestone" cx="132" cy="342" r="4" />
+          <circle class="milestone" cx="240" cy="229" r="4" />
+          <circle class="milestone" cx="318" cy="110" r="5" />
+        </svg>
+
+        <img src="plane1.png" alt="plane" class="plane" id="plane" />
+        <div class="trail-container" id="trailContainer"></div>
+
+        <div class="label show" style="left: 20px; bottom: 32px;">
+          <strong>⟡ launch</strong> oct 2022
+        </div>
+        <div class="label" id="label1" style="left: 50px; top: 265px;">
+          <strong>◈ waypoint</strong> 2023
+        </div>
+        <div class="label" id="label2" style="left: 140px; top: 165px;">
+          <strong>◈ waypoint</strong> 2024–2025
+        </div>
+        <div class="label" id="label3" style="right: 10px; top: 38px;">
+          <strong>✧ arrival</strong> mar 2026
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="progress-row">
+        <span id="progressText">memulai perjalanan...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="footnote">
+        <span>✦ pilot determines path ✦</span>
+        <span>→ game transfer</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const months = [
+        "oct 2022","nov 2022","dec 2022",
+        "jan 2023","feb 2023","mar 2023","apr 2023","may 2023","jun 2023","jul 2023","aug 2023","sep 2023","oct 2023","nov 2023","dec 2023",
+        "jan 2024","feb 2024","mar 2024","apr 2024","may 2024","jun 2024","jul 2024","aug 2024","sep 2024","oct 2024","nov 2024","dec 2024",
+        "jan 2025","feb 2025","mar 2025","apr 2025","may 2025","jun 2025","jul 2025","aug 2025","sep 2025","oct 2025","nov 2025","dec 2025",
+        "jan 2026","feb 2026","mar 2026"
+      ];
+
+      const layerSelector = document.getElementById('layerSelector');
+      const layerJourney = document.getElementById('layerJourney');
+      const cardDhafir = document.getElementById('selectorDhafir');
+      const cardIntan = document.getElementById('selectorIntan');
+      const startBtn = document.getElementById('startJourneyBtn');
+      const path = document.getElementById('routeProgress');
+      const plane = document.getElementById('plane');
+      const monthDisplay = document.getElementById('monthDisplay');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const progressPercent = document.getElementById('progressPercent');
+      const label1 = document.getElementById('label1');
+      const label2 = document.getElementById('label2');
+      const label3 = document.getElementById('label3');
+      const trailContainer = document.getElementById('trailContainer');
+      const pilotIndicatorAvatar = document.getElementById('pilotIndicatorAvatar');
+      const pilotIndicatorName = document.getElementById('pilotIndicatorName');
+      const floatingParticles = document.getElementById('floatingParticles');
+
+      let selectedPilot = null;
+      let animationStarted = false;
+      let animFrame = null;
+      let startTime = null;
+      const DURATION = 18000;
+
+      const totalLength = path.getTotalLength();
+      path.style.strokeDasharray = totalLength;
+      path.style.strokeDashoffset = totalLength;
+
+      // PARTIKEL
+      for (let i = 0; i < 24; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+        particle.style.width = (2 + Math.random() * 5) + 'px';
+        particle.style.height = particle.style.width;
+        floatingParticles.appendChild(particle);
+      }
+
+      function selectPilot(pilot) {
+        selectedPilot = pilot;
+        cardDhafir.classList.remove('selected');
+        cardIntan.classList.remove('selected');
+        if (pilot === 'dhafir') {
+          cardDhafir.classList.add('selected');
+        } else {
+          cardIntan.classList.add('selected');
+        }
+        startBtn.classList.remove('disabled');
+        startBtn.disabled = false;
+      }
+
+      cardDhafir.addEventListener('click', () => selectPilot('dhafir'));
+      cardIntan.addEventListener('click', () => selectPilot('intan'));
+
+      function startJourney() {
+        if (!selectedPilot || animationStarted) return;
+        
+        if (selectedPilot === 'dhafir') {
+          pilotIndicatorAvatar.textContent = 'D';
+          pilotIndicatorName.textContent = 'DHAFIR';
+          plane.src = 'plane1.png';
+        } else {
+          pilotIndicatorAvatar.textContent = 'I';
+          pilotIndicatorName.textContent = 'INTAN';
+          plane.src = 'plane2.png';
+        }
+        
+        layerSelector.classList.add('hidden');
+        layerJourney.classList.add('show');
+        
+        const startPoint = path.getPointAtLength(0);
+        const nextPoint = path.getPointAtLength(5);
+        const startAngle = Math.atan2(nextPoint.y - startPoint.y, nextPoint.x - startPoint.x) * 180 / Math.PI;
+        plane.style.left = startPoint.x + 'px';
+        plane.style.top = startPoint.y + 'px';
+        plane.style.transform = `translate(-50%, -50%) rotate(${startAngle}deg)`;
+        
+        setTimeout(() => {
+          animationStarted = true;
+          startTime = performance.now();
+          animate(startTime);
+        }, 400);
+      }
+
+      startBtn.addEventListener('click', startJourney);
+
+      function addParticles(x, y, count, isIntan = false) {
+        for (let i = 0; i < count; i++) {
+          if (trailContainer.children.length > 45) {
+            trailContainer.removeChild(trailContainer.children[0]);
+          }
+          const dust = document.createElement('div');
+          dust.className = 'stardust';
+          let offsetX = (Math.random() - 0.5) * (isIntan ? 70 : 40);
+          let offsetY = (Math.random() - 0.5) * (isIntan ? 70 : 35);
+          dust.style.left = (x + offsetX) + 'px';
+          dust.style.top = (y + offsetY) + 'px';
+          const size = isIntan ? 8 + Math.random() * 48 : 8 + Math.random() * 34;
+          dust.style.width = size + 'px';
+          dust.style.height = size + 'px';
+          if (isIntan) {
+            dust.style.background = `radial-gradient(circle, rgba(255, ${150 + Math.floor(105 * Math.random())}, 255, 0.8) 0%, rgba(210, 130, 255, 0.3) 70%, transparent 100%)`;
+          }
+          dust.style.animationDuration = 0.7 + Math.random() * 1.2 + 's';
+          trailContainer.appendChild(dust);
+          setTimeout(() => {
+            if (dust.parentNode) dust.remove();
+          }, 1400);
+        }
+      }
+
+      function getChaoticPosition(basePoint, progress) {
+        if (selectedPilot !== 'intan') return basePoint;
+        const t = progress * 25;
+        const chaosX = Math.sin(t) * 32 + Math.cos(t * 1.4) * 26 + Math.sin(t * 2.1) * 18;
+        const chaosY = Math.cos(t * 1.8) * 36 + Math.sin(t * 0.8) * 22 + Math.cos(t * 2.5) * 14;
+        return {
+          x: basePoint.x + chaosX,
+          y: basePoint.y + chaosY
+        };
+      }
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const rawProgress = Math.min(elapsed / DURATION, 1);
+        const progress = rawProgress < 0.5 ? 2 * rawProgress * rawProgress : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
+
+        const drawLength = totalLength * progress;
+        path.style.strokeDashoffset = totalLength - drawLength;
+
+        const basePoint = path.getPointAtLength(drawLength);
+        let actualPoint;
+        let angle;
+        
+        if (selectedPilot === 'intan') {
+          actualPoint = getChaoticPosition(basePoint, progress);
+          const nextBase = path.getPointAtLength(Math.min(drawLength + 6, totalLength));
+          const angleBase = Math.atan2(nextBase.y - basePoint.y, nextBase.x - basePoint.x) * 180 / Math.PI;
+          angle = angleBase + Math.sin(progress * 35) * 30 + Math.cos(progress * 20) * 15;
+        } else {
+          actualPoint = basePoint;
+          const nextPoint = path.getPointAtLength(Math.min(drawLength + 4, totalLength));
+          angle = Math.atan2(nextPoint.y - actualPoint.y, nextPoint.x - actualPoint.x) * 180 / Math.PI;
+        }
+
+        plane.style.left = actualPoint.x + 'px';
+        plane.style.top = actualPoint.y + 'px';
+        plane.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+        const particleCount = selectedPilot === 'intan' ? 5 + Math.floor(progress * 10) : 3 + Math.floor(progress * 7);
+        addParticles(actualPoint.x, actualPoint.y, particleCount, selectedPilot === 'intan');
+
+        const monthIndex = Math.min(Math.floor(progress * months.length), months.length - 1);
+        monthDisplay.textContent = months[monthIndex];
+        
+        const percent = Math.min(Math.round(progress * 100), 100);
+        progressFill.style.width = percent + '%';
+        progressPercent.textContent = percent + '%';
+
+        if (progress > 0.28) label1.classList.add('show');
+        if (progress > 0.58) label2.classList.add('show');
+        if (progress > 0.92) label3.classList.add('show');
+
+        if (selectedPilot === 'intan') {
+          if (progress < 0.2) progressText.textContent = 'intan: lepas kendali';
+          else if (progress < 0.5) progressText.textContent = 'intan: liar tapi asyik';
+          else if (progress < 0.85) progressText.textContent = 'intan: gajelas tapi sampai';
+          else progressText.textContent = 'intan: landing? gajelas';
+        } else {
+          if (progress < 0.2) progressText.textContent = 'dhafir: takeoff stabil';
+          else if (progress < 0.5) progressText.textContent = 'dhafir: on course';
+          else if (progress < 0.85) progressText.textContent = 'dhafir: approaching';
+          else progressText.textContent = 'dhafir: landing smooth';
+        }
+
+        if (progress < 1) {
+          animFrame = requestAnimationFrame(() => animate(performance.now()));
+        } else {
+          progressFill.style.width = '100%';
+          progressPercent.textContent = '100%';
+          monthDisplay.textContent = 'mar 2026';
+          label3.classList.add('show');
+          progressText.textContent = selectedPilot === 'intan' ? 'intan: wleeh.. sampai juga' : 'dhafir: journey complete';
+
+          const finalPoint = path.getPointAtLength(totalLength);
+          for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+              addParticles(finalPoint.x, finalPoint.y, 6, selectedPilot === 'intan');
+            }, i * 40);
+          }
+
+          setTimeout(() => {
+            layerJourney.classList.add('fade-out');
+          }, 1300);
+          
+          setTimeout(() => {
+            window.location.href = 'game.html';
+          }, 2300);
+        }
+      }
+
+      const initialPoint = path.getPointAtLength(0);
+      const nextInitial = path.getPointAtLength(5);
+      const initialAngle = Math.atan2(nextInitial.y - initialPoint.y, nextInitial.x - initialPoint.x) * 180 / Math.PI;
+      plane.style.left = initialPoint.x + 'px';
+      plane.style.top = initialPoint.y + 'px';
+      plane.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg)`;
+    })();
+  </script>
+</body>
+</html>
